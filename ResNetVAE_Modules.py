@@ -153,7 +153,7 @@ def calc_emd_vals(X, X_ind):
 
 def do_eval(resnet, val_loader, epoch, X_ind, n_channels, idx=0):
     loss_ = []
-    emd_arr = []
+    emd_vals = []
     ind_loss = []
     a = time()
     monitor_step = 10
@@ -163,27 +163,20 @@ def do_eval(resnet, val_loader, epoch, X_ind, n_channels, idx=0):
         if X_ind != 3:
             X = data['X_jets'][:, X_ind, :, :].reshape(data['X_jets'][:, X_ind, :, :].shape[0],  1, 85, 85).cuda()
             emd_vals = calc_emd_vals(X, X_ind)
-        else: 
-            X = data['X_jets'].cuda()
-            emd_vals = []
-            for i in range(3):
-                emd_vals.append(calc_emd_vals(X, i))
-        Xreco = resnet(X)
-        if X_ind != 3:
             ind_loss = list(map(lambda x, xreco: np.sum((x - xreco) ** 2)/float(x.shape[0] * x.shape[1]), X.cpu().numpy()[:, X_ind, :, :], Xreco.detach().cpu().numpy()[:, X_ind, :, :]))
         else: 
-            for i in range(3): 
+            X = data['X_jets'].cuda()
+            for i in range(3):
+                emd_vals.append(calc_emd_vals(X, i))
                 ind_loss.append(list(map(lambda x, xreco: np.sum((x - xreco) ** 2)/float(x.shape[0] * x.shape[1]), X.cpu().numpy()[:, i, :, :], Xreco.detach().cpu().numpy()[:, i, :, :])))
+        Xreco = resnet(X)
         X = X[...,1:-1,:]
         Xreco = Xreco[...,1:-1,:]
-        losses = calc_loss(n_channels, X, Xreco)
-        loss_.append(losses.tolist())
+        loss_.append((calc_loss(n_channels, X, Xreco)).tolist())
     loss_ = np.array(loss_)  
     s = '%d: Val loss:%f, MAE: %f, N samples: %d in %f min'%(epoch, loss_.mean(), (np.sqrt(loss_)).mean(), len(loss_), (time() -a)/60.)
     print(s)
     return loss_, emd_vals, ind_loss
-
-
 
 def save(add_dir, obj, n, expt_name, epoch, resnet, optimizer, new_model, name, ind):
     filename = n + name + '_' + ind + '_epoch_' + str(epoch) + '.pkl'
