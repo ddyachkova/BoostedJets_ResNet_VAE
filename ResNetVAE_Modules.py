@@ -108,15 +108,9 @@ def calc_loss(n_channels, X, Xreco):
     #sc_fact_arr = [12, 1, 90]
     #sc_fact_arr = [90, 1, 12]
     sc_fact_arr = [90, 100, 12]
-
-    #n_channels = 3
-    
     #mse = lambda X, Xreco, n, sc_fact: sc_fact * F.mse_loss(Xreco[:, n, :, :], X[:, n, :, :])
-    mse = lambda X, Xreco, n: F.mse_loss(Xreco[:, n, :, :], X[:, n, :, :])
-
-    #mse = lambda X, Xreco, n, sc_fact: sc_fact * F.l1_loss(Xreco[:, n, :, :], X[:, n, :, :])
-
     #return sum(map(partial(mse, X, Xreco), range(n_channels), sc_fact_arr)) 
+    mse = lambda X, Xreco, n: F.mse_loss(Xreco[:, n, :, :], X[:, n, :, :])
     return sum(map(partial(mse, X, Xreco), range(n_channels))) 
 
 def plot_orig_reco(X, Xreco, imgs, name, epoch, i, len_train_loader, loss):
