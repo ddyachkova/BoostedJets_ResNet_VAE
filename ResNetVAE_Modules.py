@@ -78,13 +78,15 @@ class ParquetDataset(Dataset):
         return self.parquet.num_row_groups
 
 
-def initialize(resblocks, n_channels):
+def initialize(resblocks, n_channels, sch=False):
     resnet = networks.AutoEncoder(n_channels, resblocks, [16, 32, 64, 128])
     optimizer = optim.Adam(resnet.parameters(), lr=5.e-4)
     resnet.cuda()
-    #scheduler = StepLR(optimizer, step_size=100, gamma=0.1)
-    #return resnet, optimizer, scheduler
-    return resnet, optimizer
+    if sch:
+        scheduler = StepLR(optimizer, step_size=100, gamma=0.1)
+    else: 
+        scheduler = None 
+    return resnet, optimizer, scheduler
 
 
 def train_val_loader(datasets, train_cut, batch_size, random_sampler=True):
@@ -223,8 +225,7 @@ def train(train_loader, val_loader, resblocks, n_epochs, name, batch_size, wdir,
     channels_mapping = {'Tracks': 1, 'ECAL': 1, 'HCAL': 1,  'ECAL HCAL Tracks': 3}
     X_ind = name_mapping[name]
     n_channels = channels_mapping[name]
-    resnet, optimizer = initialize(resblocks, n_channels)
-    resnet.cuda()
+    resnet, optimizer, scheduler = initialize(resblocks, n_channels, sch)    
     epochs = n_epochs
     monitor_step = 10
     resnet.train()
@@ -236,7 +237,6 @@ def train(train_loader, val_loader, resblocks, n_epochs, name, batch_size, wdir,
         print(s)
 
         print(">> Training <<<<<<<<")
-        #now = time.time()
         for i, data in enumerate(train_loader):
             if X_ind != 3:
                 X = data['X_jets'][:, X_ind, :, :].reshape(data['X_jets'][:, X_ind, :, :].shape[0], 1, 85, 85).cuda()
@@ -247,7 +247,8 @@ def train(train_loader, val_loader, resblocks, n_epochs, name, batch_size, wdir,
             loss = calc_loss(n_channels, X, Xreco)
             loss.backward()
             optimizer.step()
-            #scheduler.step()
+            if scheduler is not None:
+                scheduler.step()
             if i % monitor_step == 0:
                 #if i!= 0:
                 try:
