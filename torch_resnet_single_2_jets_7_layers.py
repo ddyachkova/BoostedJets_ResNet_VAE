@@ -122,12 +122,11 @@ class Encoder(nn.Module):
         if self.debug: print(x.size(), 'Layer5')    
 
 
+        # Bottleneck
         x = F.max_pool2d(x, kernel_size=x.size()[2:])
         if self.debug: print(x.size())        
         x = x.view(x.size()[0], -1) #self.fmaps[1])
         if self.debug: print(x.size())
-        # x = self.fc(x)
-        #x = self.FCN(x)
         return x
 
 
@@ -141,25 +140,14 @@ class Decoder(nn.Module):
         self.in_channels = in_channels
         self.conv01 = nn.ConvTranspose2d(fmaps[0], fmaps[0],  kernel_size=2, stride=1, padding=0)
         self.conv02 = nn.ConvTranspose2d(fmaps[0], in_channels,  kernel_size=5, stride=2, padding=0)
-        # self.conv03 = nn.ConvTranspose2d(fmaps[0], in_channels,  kernel_size=8, stride=1, padding=0)
-
-        # self.conv00 = nn.ConvTranspose2d(fmaps[0], fmaps[0], kernel_size=4, stride=2, padding=1)
-        # self.conv1 = nn.ConvTranspose2d(fmaps[0],  fmaps[0],  kernel_size=7, stride=1, padding=0)
-
-        # self.layer1 = self.block_layers(self.nblocks, [fmaps[0],fmaps[0]])
-        # self.layer2 = self.block_layers(1, [fmaps[0],fmaps[1]])
-        # self.layer3 = self.block_layers(self.nblocks, [fmaps[1],fmaps[1]])
-
+        
         self.layer1 = self.block_layers(self.nblocks, [fmaps[3],fmaps[3]])
         self.layer2 = self.block_layers(1, [fmaps[3],fmaps[2]], out_shape=(5,5))
         self.layer3 = self.block_layers(self.nblocks, [fmaps[2],fmaps[2]])
         self.layer4 = self.block_layers(1, [fmaps[2],fmaps[1]], out_shape=(10,10))
         self.layer5 = self.block_layers(self.nblocks, [fmaps[1],fmaps[1]])
-
         self.layer6 = self.block_layers(1, [fmaps[1],fmaps[0]], out_shape=(20,20))
         self.layer7 = self.block_layers(self.nblocks, [fmaps[0],fmaps[0]])
-
-        #self.fc = nn.Linear(fmaps[1], 1)
         self.fc = nn.Linear(self.fmaps[-1], self.fmaps[-1]*3*3)
         self.debug = False
 
@@ -170,19 +158,12 @@ class Decoder(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        # x = F.max_pool2d(x, kernel_size=x.size()[2:])
-        # if self.debug: print("Maxpool-FC", x.size())
-        # #if self.debug: print(x.size())
-        # x = x.view(x.size()[0], -1)
-        # if self.debug: print(x.size())
-
+        
         x = self.fc(x)
         if self.debug: print(x.size(), 'Decoder Input')
-        x = x.view(-1, self.fmaps[-1], 3, 3) # 3x3, down4/5
+        x = x.view(-1, self.fmaps[-1], 3, 3) 
         if self.debug: print(x.size())        
 
-        # x = F.max_pool2d(x, kernel_size=2)
-        # if self.debug: print(x.size(), 'Maxpooling')
         x = self.layer1(x)
         if self.debug: print(x.size(), 'Decoder Layer1')
         x = self.layer2(x)
@@ -193,45 +174,25 @@ class Decoder(nn.Module):
         if self.debug: print(x.size(), 'Decoder Layer4')
         x = self.layer5(x)
         if self.debug: print(x.size(), 'Decoder Layer5') 
-
-
         x = self.layer6(x)
         if self.debug: print(x.size(), 'Decoder Layer6')
         x = self.layer7(x)
         if self.debug: print(x.size(), 'Decoder Layer7') 
 
-        # x = self.layer4(x)
-        # if self.debug: print(x.size(), 'Decoder Layer4')       
-        # x = self.layer5(x)
-        # if self.debug: print(x.size(), 'Decoder Layer5')       
-        # x = self.conv1(x)# , output_size=(x.size()[0], 16, 16, 16))
-        # if self.debug: print(x.size(), 'Decoder Conv1')   
-
         x = F.interpolate(x, scale_factor=2)
         if self.debug: print(x.size(), 'Decoder Interpolation')        
-        # x = F.relu(x, inplace = True)
-        # if self.debug: print(x.size(), 'Decoder Relu')
-
-        # x = self.conv00(x)# , output_size=(x.size()[0], 16, 16, 16))
-        # if self.debug: print(x.size(), 'Additional Convolution')   
+        
         x = self.conv01(x)
         if self.debug: print(x.size(), 'Decoder Conv01')
+        
         x = F.relu(x, inplace = True)
         if self.debug: print(x.size(), 'Decoder Relu')
 
         x = self.conv02(x)
         if self.debug: print(x.size(), 'Decoder Conv02')
-        # x = F.relu(x, inplace = True)
-        # if self.debug: print(x.size(), 'Decoder Relu')
-
-        # x = self.conv03(x)
-        # if self.debug: print(x.size(), 'Decoder Conv03')
-
+        
         x = F.relu(x, inplace = True)
         if self.debug: print(x.size(), 'Decoder Relu')
-        # x = x.view(x.size()[0], self.fmaps[1])
-        # if self.debug: print(x.size())
-        # x = self.fc(x)
         return x
 
 class Binary(Function):
