@@ -37,6 +37,12 @@ from ResNetVAE_Modules import *
 os.environ["CUDA_VISIBLE_DEVICES"]=str(0)
 
 
+def dir_path(path):
+    if os.path.isdir(path):
+        return path
+    else:
+        raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
+
 def get_args():
     parser = argparse.ArgumentParser(description='Training parameters.')
     parser.add_argument('-total_samples', '--total_samples' , default = 150000, type=str, help='Total number of samples to run the traning on')
@@ -45,19 +51,21 @@ def get_args():
     parser.add_argument('-num_epochs', '--num_epochs' , default = 1, type=str, help='Number of epochs')
     parser.add_argument('-num_blocks', '--num_blocks' , default = 3, type=str, help='Number of blocks in the ResNet')
     parser.add_argument('-name', '--name', default = 'ECAL', type=str, help='Which channel(s) to run the training on')
+    parser.add_argument('-wdir', '--wdir', default = os.getcwd(), type=dir_path, help='The directory of the project')
 
     return parser.parse_args()
 
 
 
 def main(wdir): 
-    os.chdir(wdir)    
+    args = get_args()
+    os.chdir(args.wdir)    
     expt_name = 'ResNet_VAE_Jets_all_channels'
     for d in ['MODELS', 'METRICS']:
         if not os.path.isdir('%s/%s'%(d, expt_name)):
             os.makedirs('%s/%s'%(d, expt_name))
 
-    args = get_args()
+    
     num_files = int(args.total_samples/(32*1000))
     os.chdir(wdir + '\Data\Parquet_Data')
     datasets = ['jets_hdf5_X_ecal_hcal_tracks-%i.h5.snappy.parquet'%i for i in range(num_files+1)]
