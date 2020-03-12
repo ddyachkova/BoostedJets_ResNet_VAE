@@ -8,9 +8,6 @@ import glob
 import time
 import glob
 
-wdir = r'C:\Users\Darya\Documents\GitHub\Autoencoders'
-os.chdir(wdir)
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -53,7 +50,8 @@ def get_args():
 
 
 
-def main(): 
+def main(wdir): 
+    os.chdir(wdir)    
     expt_name = 'ResNet_VAE_Jets_all_channels'
     for d in ['MODELS', 'METRICS']:
         if not os.path.isdir('%s/%s'%(d, expt_name)):
@@ -62,7 +60,6 @@ def main():
     args = get_args()
     num_files = int(args.total_samples/(32*1000))
     os.chdir(wdir + '\Data\Parquet_Data')
-    max_ind = max([int(f.split('-')[1].split('.')[0]) for f in os.listdir(wdir + '\Data\Parquet_Data')])
     datasets = ['jets_hdf5_X_ecal_hcal_tracks-%i.h5.snappy.parquet'%i for i in range(num_files+1)]
     train_cut = int(0.8 * total_samples)
     train_loader, val_loader = train_val_loader(datasets, train_cut, args.batch_size, random_sampler = args.random_sampler)
