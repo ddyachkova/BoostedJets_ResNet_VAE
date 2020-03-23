@@ -61,17 +61,9 @@ class ParquetDataset(Dataset):
         data = self.parquet.read_row_group(index, columns=self.cols).to_pydict()
         data['X_jets'] = np.float32(data['X_jets'][0]) 
         # Preprocessing
-        #data['X_jets'] = data['X_jets'][:, 20:105, 20:105]
+        data['X_jets'] = data['X_jets'][:, 20:105, 20:105]
         data['X_jets'][data['X_jets'] < 1.e-3] = 0. # Zero-Suppression
-        #scaling_factors = [40, 10, 250]
-        #scaling_factors = [60, 5, 360]
-        #scaling_factors = [360, 5, 60]
-        #scaling_factors = [90, 1, 12]
-        #scaling_factors = [80, 10, 300]
-        #scaling_factors = [23, 1.5, 2.3]
-        #scaling_factors = [120, 20, 30]
-        #scaling_factors = [240, 14, 4]
-        scaling_factors = [35, 3, 3]
+        scaling_factors = [70, 5, 5.5]
         for i in range(3):
             if data['X_jets'][i, :, :].sum() != 0.0:
                 data['X_jets'][i, :, :] = data['X_jets'][i, :, :]*scaling_factors[i] # To standardize
