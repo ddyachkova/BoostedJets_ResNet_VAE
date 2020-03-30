@@ -99,20 +99,8 @@ def train_val_loader(datasets, train_cut, batch_size, random_sampler=True):
     return train_loader, val_loader
 
 def calc_loss(n_channels, X, Xreco):
-    #sc_fact_arr = [4, 1, 25]
-    #sc_fact_arr = [12, 1, 90]
-    #sc_fact_arr = [90, 1, 12]
-    #sc_fact_arr = [90, 100, 12]
-
-    #n_channels = 3
-    
-    #mse = lambda X, Xreco, n, sc_fact: sc_fact * F.mse_loss(Xreco[:, n, :, :], X[:, n, :, :])
     mse_total = lambda X, Xreco, n: F.mse_loss(Xreco[:, n, :, :], X[:, n, :, :])
     mse_ind = lambda X, Xreco: F.mse_loss(Xreco, X)
-
-    #mse = lambda X, Xreco, n, sc_fact: sc_fact * F.l1_loss(Xreco[:, n, :, :], X[:, n, :, :])
-
-    #return sum(map(partial(mse, X, Xreco), range(n_channels), sc_fact_arr)) 
     if n_channels == 3:
         return sum(map(partial(mse_total, X, Xreco), range(n_channels))) 
     else: 
@@ -144,15 +132,11 @@ def calc_emd(img1, img2):
     return emd(img1, img2, R=1.0, norm=False, beta=1.0, measure='euclidean', coords='hadronic', return_flow=False, gdim=None, mask=False, n_iter_max=100000, periodic_phi=False, phi_col=2, empty_policy='error')
 
 def calc_emd_reference(X, ind):
-#     sample = X[:, ind, :, :].reshape(X.shape[0], X.shape[2], X.shape[3])
-#     avg = np.average(sample,axis=0)
     avg = np.average(X,axis=0)
     emd_arr = []
     for i in range(X.shape[0]):
         #emd_arr = np.append(emd_arr, calc_emd(avg, sample[i]))
         emd_arr = np.append(emd_arr, calc_emd(avg, X[i]))
-
-    #return sample[emd_arr.argmin()]
     return X[emd_arr.argmin()]
 
 def calc_emd_vals(X, X_ind):
