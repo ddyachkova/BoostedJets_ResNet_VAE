@@ -147,7 +147,7 @@ def calc_emd_vals(X, X_ind):
 def eval_losses(X, Xreco, X_ind):
     ind_loss = list(map(lambda x, xreco: np.sum((x - xreco) ** 2)/float(x.shape[0] * x.shape[1]), X, Xreco))
     emd_vals = calc_emd_vals(X, X_ind)
-    return ind_loss, emd_vals
+    return list(ind_loss, emd_vals)
 
 def get_X(data, X_ind):
     if X_ind != 3:
