@@ -166,7 +166,7 @@ def do_eval(resnet, val_loader, epoch, X_ind, n_channels, idx=0):
         X = get_X(data, X_ind)
         Xreco = resnet(X)
         if X_ind != 3:
-            emd_vals_ind_loss = eval_losses(X.cpu().numpy()[:, X_ind, :, :], Xreco.detach().cpu().numpy()[:, X_ind, :, :], X_ind)
+            emd_vals_ind_loss = eval_losses(X.cpu().numpy(), Xreco.detach().cpu().numpy(), X_ind)
         if X_ind == 3: 
             emd_vals_ind_loss = list(map(partial(eval_losses, X.cpu().numpy()[:, X_ind-1, :, :], Xreco.detach().cpu().numpy()[:, X_ind-1, :, :]), range(0, X_ind)))
         X, Xreco = X[...,1:-1,:], Xreco[...,1:-1,:]
