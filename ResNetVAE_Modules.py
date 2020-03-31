@@ -213,7 +213,7 @@ def train(train_loader, val_loader, resblocks, n_epochs, name, batch_size, wdir,
     name_mapping = {'Tracks': 0, 'ECAL': 1, 'HCAL': 2, 'ECAL HCAL Tracks': 3}
     channels_mapping = {'Tracks': 1, 'ECAL': 1, 'HCAL': 1,  'ECAL HCAL Tracks': 3}
     X_ind, n_channels, epochs, monitor_step = name_mapping[name], channels_mapping[name], n_epochs, 10
-    resnet, optimizer, scheduler = initialize(resblocks, n_channels, sch)
+    resnet, optimizer, scheduler = initialize(resblocks, n_channels, sch=False)
     resnet.train()
     a = time()
     for e in range(epochs):
