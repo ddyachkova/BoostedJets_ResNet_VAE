@@ -114,7 +114,7 @@ def plot_orig_reco(X, Xreco, imgs, name, epoch, i, len_train_loader, loss):
             raise ZeroTensorPrediction
         print(' >> AE-reco image:', name)
         plot_img(Xreco.detach().cpu().numpy().reshape(85, 85))
-        ind_loss = calc_loss(1, X, Xreco)
+    ind_loss = calc_loss(1, X, Xreco)
     res = '%d: (%d/%d) Total train loss:%f, Ind train loss: %f, Emax: %f, Erecomax: %f'%(epoch, i, len_train_loader, loss.item(), ind_loss.item(),  X.max(), Xreco.max())
     return res
 
