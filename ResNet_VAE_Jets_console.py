@@ -66,7 +66,7 @@ def main():
             os.makedirs('%s/%s'%(d, expt_name))
 
     wdir = args.wdir
-    num_files = int(args.total_samples/(32*1000))
+    num_files = int(int(args.total_samples)/(32*1000))
     os.chdir(wdir + '\Data\Parquet_Data')
     datasets = ['jets_hdf5_X_ecal_hcal_tracks-%i.h5.snappy.parquet'%i for i in range(num_files+1)]
     train_cut = int(0.8 * total_samples)
