@@ -71,8 +71,7 @@ def main():
     datasets = ['jets_hdf5_X_ecal_hcal_tracks-%i.h5.snappy.parquet'%i for i in range(num_files+1)]
     train_cut = int(0.8 * int(args.total_samples))
     train_loader, val_loader = train_val_loader(datasets, train_cut, args.batch_size, random_sampler = args.random_sampler)
-    train(train_loader, val_loader, args.num_blocks, args.num_epochs, args.name, args.batch_size, imgs = False)
-
+    train(train_loader, val_loader, args.num_blocks, args.num_epochs, args.name, args.batch_size, args.wdir, expt_name, imgs=False)
 
 if __name__ == "__main__":
     main()
